@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: ToDo
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/todo_db
+    username: ${username}
+    password: ${password}
