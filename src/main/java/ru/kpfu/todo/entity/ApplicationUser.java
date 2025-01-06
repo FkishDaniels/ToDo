@@ -7,8 +7,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
-
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,14 +14,20 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 public class ApplicationUser implements UserDetails {
+    private Long id;
     private String username;
     private String email;
     private String password;
+
     private List<Todo> todoList;
+
+    private List<GlobalPermission> globalPermissions;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        return globalPermissions.stream()
+                .map(gb -> new SimpleGrantedAuthority(gb.getName().name()))
+                .toList();
     }
 
     @Override
