@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Добро пожаловать</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap');
+
+    body {
+      margin: 0;
+      font-family: 'Comfortaa', cursive;
+      background: url('/static/img/company.png') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+    }
+
+    .welcome-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      background: rgba(0, 0, 0, 0.5); /* Полупрозрачная подложка */
+      padding: 20px;
+      border-radius: 15px;
+    }
+
+
+    .logo img {
+      width: 120px;
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      font-size: 36px;
+      margin: 0 0 16px;
+    }
+
+    p {
+      font-size: 18px;
+      margin: 0 0 24px;
+    }
+
+    .button {
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: bold;
+      color: #fff;
+      background-color: #1a73e8;
+      border: none;
+      border-radius: 8px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .button:hover {
+      background-color: #155cb0;
+    }
+
+    .footer {
+      margin-top: 32px;
+      font-size: 14px;
+      color: #ccc;
+    }
+  </style>
+</head>
+<body>
+<div class="welcome-container">
+  <div class="logo">
+    <img th:src="@{/static/img/todo.png}" alt="Logo">
+  </div>
+  <h1>Добро пожаловать в Менеджер задач</h1>
+  <p>Управляй своими задачами ЛЕГКО и БЫСТРО</p>
+  <a href="/authenticate/login" class="button">Начать</a>
+  <div class="footer">Marukha D.A. 09-153</div>
+</div>
+</body>
+</html>

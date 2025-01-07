@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: url('/static/img/company.png') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+        }
+
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            backdrop-filter: blur(10px);
+        }
+
+        .auth-box {
+            background-color: rgba(0, 0, 0, 0.8);
+            border-radius: 16px;
+            padding: 32px;
+            width: 360px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+        }
+
+        .auth-box h1 {
+            font-size: 24px;
+            margin: 0 0 16px;
+            text-align: center;
+        }
+
+        .auth-box form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .auth-box label {
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .auth-box input {
+            padding: 10px;
+            margin-bottom: 4px;
+            border: none;
+            border-radius: 8px;
+            background-color: #333;
+            color: #fff;
+            font-size: 16px;
+        }
+
+        .auth-box input:focus {
+            outline: none;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+        }
+
+        .auth-box .error-message {
+            font-size: 12px;
+            color: #f44336;
+            margin-bottom: 16px;
+        }
+
+        .auth-box button {
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background-color: #1a73e8;
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .auth-box button:hover {
+            background-color: #155cb0;
+        }
+
+        .auth-box .login-link {
+            margin-top: 16px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .auth-box .login-link a {
+            color: #1a73e8;
+            text-decoration: none;
+        }
+
+        .auth-box .login-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="auth-container">
+    <div class="auth-box">
+        <h1>Регистрация</h1>
+
+        <!-- Общая ошибка -->
+        <div th:if="${error}" class="error-message" th:text="${error}"></div>
+
+        <form th:object="${registerRequest}" action="/authenticate/register" method="post">
+            <label for="userName">Имя пользователя</label>
+            <input type="text" id="userName" name="userName" placeholder="Введите имя пользователя"
+                   th:field="*{userName}" />
+            <div th:if="${#fields.hasErrors('userName')}" class="error-message"
+                 th:errors="*{userName}"></div>
+
+            <label for="email">Почта</label>
+            <input type="email" id="email" name="email" placeholder="Введите почту"
+                   th:field="*{email}" />
+            <div th:if="${#fields.hasErrors('email')}" class="error-message"
+                 th:errors="*{email}"></div>
+
+            <label for="password">Пароль</label>
+            <input type="password" id="password" name="password" placeholder="Введите пароль"
+                   th:field="*{password}" />
+            <div th:if="${#fields.hasErrors('password')}" class="error-message"
+                 th:errors="*{password}"></div>
+
+            <button type="submit">Зарегистрироваться</button>
+        </form>
+
+        <div class="login-link">
+            Уже есть аккаунт? <a href="/authenticate/login">Войти</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>
