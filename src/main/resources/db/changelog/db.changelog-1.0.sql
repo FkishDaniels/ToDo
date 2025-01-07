@@ -46,3 +46,5 @@ CREATE TABLE IF NOT EXISTS user_permission
     CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES application_user (id),
     CONSTRAINT fk_permission FOREIGN KEY (permission_id) REFERENCES global_permission (id)
 );
+--changeset DaniilMarukha:5
+ALTER TABLE todo add column name VARCHAR(255) NOT NULL;
