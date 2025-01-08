@@ -14,8 +14,8 @@ CREATE TABLE IF NOT EXISTS todo
     id            BIGSERIAL NOT NULL,
     title         VARCHAR(255) NOT NULL,
     description   TEXT,
-    created_date  TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    due_date      TIMESTAMP,
+    created_date  DATE DEFAULT CURRENT_DATE NOT NULL,  -- Изменено на DATE
+    due_date      DATE,                                 -- Изменено на DATE
     is_completed  BOOLEAN DEFAULT FALSE NOT NULL,
     priority      VARCHAR(50) DEFAULT 'MEDIUM',
     PRIMARY KEY (id)

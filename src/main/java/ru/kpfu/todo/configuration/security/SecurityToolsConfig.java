@@ -24,6 +24,7 @@ public class SecurityToolsConfig {
 
     private final ApplicationUserRepository applicationUserRepository;
 
+
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> applicationUserRepository.findByEmail(username)

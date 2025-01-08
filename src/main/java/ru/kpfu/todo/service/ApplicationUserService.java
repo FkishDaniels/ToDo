@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.kpfu.todo.controller.authentication.payload.AuthenticationRequest;
@@ -30,13 +31,18 @@ public class ApplicationUserService {
 
         applicationUserRepository.save(newUser);
     }
-    public void authenticate(AuthenticationRequest authenticationRequest) {
+    public ApplicationUser authenticate(AuthenticationRequest authenticationRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         authenticationRequest.getEmail(),
                         authenticationRequest.getPassword()
                 )
         );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        var user = applicationUserRepository.findByEmail(authenticationRequest.getEmail())
+                .orElseThrow();
+
+        return user;
     }
 
 

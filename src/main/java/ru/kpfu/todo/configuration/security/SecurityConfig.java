@@ -29,9 +29,10 @@ public class SecurityConfig {
                                 .requestMatchers("/authenticate/**").permitAll() // запрос не требует аутентификации
                                 .requestMatchers("/swagger-ui/**").permitAll()
                                 .requestMatchers("/actuator/**").permitAll()
-                                .anyRequest().authenticated()) // запрос требует аутентификацию
-                .sessionManagement(sessionManagementConfigurer ->
-                        sessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .anyRequest().authenticated())
+                .formLogin(formLogin -> formLogin.loginPage("/authenticate/login")
+                        .defaultSuccessUrl("/home")
+                )
                 .authenticationProvider(authenticationProvider);
         return http.build();
     }

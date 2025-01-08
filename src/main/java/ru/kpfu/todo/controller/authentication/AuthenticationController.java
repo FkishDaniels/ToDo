@@ -25,8 +25,12 @@ public class AuthenticationController {
     @PostMapping("/login")
     public String authenticateUser(@ModelAttribute AuthenticationRequest authenticationRequest,
                                    Model model){
+
         try {
-            userService.authenticate(authenticationRequest);
+            System.out.println("Полученный email: " + authenticationRequest.getEmail());
+            System.out.println("Полученный пароль: " + authenticationRequest.getPassword());
+            var user = userService.authenticate(authenticationRequest);
+            model.addAttribute("user", user);
             return "redirect:/home";
         }catch (BadCredentialsException e){
             // Добавление ошибки в модель для отображения на странице

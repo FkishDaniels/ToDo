@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Все задачи</title>
+    <style>
+        body {
+            font-family: 'Comfortaa', cursive;
+            background-color: #f4f5f7;
+            margin: 0;
+            padding: 20px;
+        }
+
+        header {
+            background-color: #0747a6;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .tasks-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .task-card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .task-header h2 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .priority {
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 5px;
+            color: white;
+        }
+
+        .priority.HIGH {
+            background-color: #d04437;
+        }
+
+        .priority.MEDIUM {
+            background-color: #ffab00;
+        }
+
+        .priority.LOW {
+            background-color: #00875a;
+        }
+
+        .task-body {
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .actions {
+            text-align: right;
+        }
+
+        .actions button {
+            background-color: #0052cc;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .actions button:hover {
+            background-color: #0747a6;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>Все задачи</h1>
+</header>
+
+<div class="tasks-container">
+    <div th:each="todo : ${todos}" class="task-card">
+        <div class="task-header">
+            <h2 th:text="${todo.title}"></h2>
+            <span th:class="'priority ' + ${todo.name}" th:text="${todo.name}"></span>
+        </div>
+        <div class="task-body">
+            <p th:text="${todo.description}"></p>
+            <p><strong>Дата создания:</strong> <span th:text="${#dates.format(todo.createdDate, 'dd.MM.yyyy')}"></span></p>
+            <p><strong>Срок:</strong> <span th:text="${#dates.format(todo.dueDate, 'dd.MM.yyyy')}"></span></p>
+        </div>
+        <div class="actions">
+            <form th:action="@{/todos/assign}" method="post">
+                <input type="hidden" name="todoId" th:value="${todo.id}">
+                <button type="submit">Взять в реализацию</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
