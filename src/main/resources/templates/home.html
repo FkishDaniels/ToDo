@@ -38,7 +38,7 @@
 
         .card-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Уменьшили minmax */
             gap: 20px;
         }
 
@@ -48,7 +48,22 @@
             border-radius: 5px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s, box-shadow 0.3s;
+            max-width: 300px; /* Ограничение ширины */
+            margin: 0 auto; /* Выравнивание по центру */
         }
+
+        .card.priority-HIGH {
+            border: 3px solid #d04437; /* Красный */
+        }
+
+        .card.priority-MEDIUM {
+            border: 3px solid #ffab00; /* Желтый */
+        }
+
+        .card.priority-LOW {
+            border: 3px solid #00875a; /* Зеленый */
+        }
+
 
         .card:hover {
             transform: scale(1.05);
@@ -109,13 +124,15 @@
 <section>
     <h2>Список ваших задач</h2>
     <div class="card-container">
-        <div class="card priority-${todo.priority}" th:each="todo : ${filteredTodos}">
+        <div class="card" th:each="todo : ${filteredTodos}"
+             th:classappend="'priority-' + ${todo.priority}">
+
             <h3 th:text="${todo.title}"></h3>
             <p th:text="'Описание: ' + ${todo.description}"></p>
             <p class="due-date"
                th:text="'Срок: ' +' (' + ${todo.daysUntilDue} + ' дн.)'">
             </p>
-
+            <p class="priority" th:text="'Приоритет :' + '( '+ ${todo.priority}+')'"></p>
             <p class="status"
                th:text="${todo.isCompleted}"></p>
         </div>

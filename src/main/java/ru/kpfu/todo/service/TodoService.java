@@ -22,6 +22,7 @@ public class TodoService {
         dto.setTitle(todo.getTitle());
         dto.setDescription(todo.getDescription());
         dto.setCreatedDate(todo.getCreatedDate());
+        dto.setPriority(todo.getPriority());
         dto.setIsCompleted(todo.getIsCompleted() ? "Завершено" : "В процессе");
         dto.setDueDate(todo.getDueDate());
         dto.setDaysUntilDue(ChronoUnit.DAYS.between(todo.getCreatedDate(), todo.getDueDate()));
