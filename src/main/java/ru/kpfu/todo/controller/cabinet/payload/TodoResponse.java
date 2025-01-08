@@ -8,11 +8,12 @@ import java.time.LocalDateTime;
 
 @Data
 public class TodoResponse {
+    private Long id;
     private String title;
     private String description;
     private LocalDateTime createdDate;
     private LocalDateTime dueDate;
     private Priority priority;
-    private String status;
+    private Status status;
     private long daysUntilDue;
 }
