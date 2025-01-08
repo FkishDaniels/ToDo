@@ -2,6 +2,7 @@ package ru.kpfu.todo.controller.cabinet.payload;
 
 import lombok.Data;
 import ru.kpfu.todo.enumiration.Priority;
+import ru.kpfu.todo.enumiration.Status;
 
 import java.time.LocalDateTime;
 
@@ -12,6 +13,6 @@ public class TodoResponse {
     private LocalDateTime createdDate;
     private LocalDateTime dueDate;
     private Priority priority;
-    private String isCompleted;
+    private String status;
     private long daysUntilDue;
 }

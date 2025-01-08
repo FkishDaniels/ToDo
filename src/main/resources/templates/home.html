@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
+    <title>Кабинет</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap');
+        /* Основные стили */
         body {
-            font-family: 'Comfortaa', cursive;
+            font-family: Arial, sans-serif;
             background-color: #f4f5f7;
             color: #172b4d;
             margin: 0;
@@ -22,23 +22,9 @@
             border-radius: 5px;
         }
 
-        header h1 {
-            margin: 0;
-            font-size: 24px;
-        }
-
-        header p {
-            margin: 5px 0 0;
-            font-size: 16px;
-        }
-
-        section {
-            margin-top: 20px;
-        }
-
         .card-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Уменьшили minmax */
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
         }
 
@@ -48,70 +34,86 @@
             border-radius: 5px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s, box-shadow 0.3s;
-            max-width: 300px; /* Ограничение ширины */
-            margin: 0 auto; /* Выравнивание по центру */
         }
-
-        .card.priority-HIGH {
-            border: 3px solid #d04437; /* Красный */
-        }
-
-        .card.priority-MEDIUM {
-            border: 3px solid #ffab00; /* Желтый */
-        }
-
-        .card.priority-LOW {
-            border: 3px solid #00875a; /* Зеленый */
-        }
-
 
         .card:hover {
             transform: scale(1.05);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
-        /* Цветовая обводка для приоритетов */
-        .priority-HIGH {
-            border: 3px solid #d04437; /* Красный */
-        }
-
-        .priority-MEDIUM {
-            border: 3px solid #ffab00; /* Желтый */
-        }
-
-        .priority-LOW {
-            border: 3px solid #00875a; /* Зеленый */
-        }
-
-        .card h3 {
-            margin: 0;
-            font-size: 18px;
-            color: #0747a6;
-        }
-
-        .card p {
-            margin: 5px 0;
-            font-size: 14px;
-        }
-
-        .due-date {
-            font-weight: bold;
-            color: #0052cc;
-        }
-
-        .status {
+        .card button {
+            background-color: #0747a6;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
             margin-top: 10px;
-            font-size: 14px;
+        }
+
+        .card button:hover {
+            background-color: #052d74;
+        }
+
+        /* Стили модального окна */
+        #editModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            margin: 10% auto;
+            padding: 20px;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-content h2 {
+            margin-top: 0;
+        }
+
+        .modal-content label {
+            display: block;
+            margin-top: 10px;
             font-weight: bold;
-            text-transform: uppercase;
         }
 
-        .status.completed {
-            color: #00875a;
+        .modal-content input,
+        .modal-content textarea,
+        .modal-content select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
 
-        .status.in-progress {
-            color: #d04437;
+        .modal-content button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .save-btn {
+            background-color: #0747a6;
+            color: white;
+        }
+
+        .cancel-btn {
+            background-color: #d04437;
+            color: white;
+            margin-left: 10px;
         }
     </style>
 </head>
@@ -124,23 +126,63 @@
 <section>
     <h2>Список ваших задач</h2>
     <div class="card-container">
-        <div class="card" th:each="todo : ${filteredTodos}"
-             th:classappend="'priority-' + ${todo.priority}">
-
+        <div class="card" th:each="todo : ${filteredTodos}">
             <h3 th:text="${todo.title}"></h3>
             <p th:text="'Описание: ' + ${todo.description}"></p>
-            <p class="due-date"
-               th:text="'Срок: ' +' (' + ${todo.daysUntilDue} + ' дн.)'">
-            </p>
-            <p class="priority" th:text="'Приоритет :' + '( '+ ${todo.priority}+')'"></p>
-            <p class="status"
-               th:text="${todo.isCompleted}"></p>
+            <p th:text="'Срок: ' + ${todo.dueDate}"></p>
+            <p th:text="'Статус: ' + ${todo.status}"></p>
+            <button onclick="openModal('/*[[${todo.id}]]*/', '/*[[${todo.title}]]*/', '/*[[${todo.description}]]*/', '/*[[${todo.dueDate}]]*/', '/*[[${todo.status}]]*/')">
+                Редактировать
+            </button>
         </div>
     </div>
 </section>
 
-<nav>
-    <a href="/todos" th:href="@{/todos}">Общий список задач</a>
-</nav>
+<!-- Модальное окно -->
+<div id="editModal">
+    <div class="modal-content">
+        <h2>Редактировать задачу</h2>
+        <form th:action="@{/todos/edit}" method="post">
+            <input type="hidden" id="taskId" name="id" value="">
+
+            <label for="title">Название</label>
+            <input type="text" id="title" name="title" value="">
+
+            <label for="description">Описание</label>
+            <textarea id="description" name="description"></textarea>
+
+            <label for="dueDate">Срок выполнения</label>
+            <input type="date" id="dueDate" name="dueDate" value="">
+
+            <label for="status">Статус</label>
+            <select id="status" name="status">
+                <option value="TODO">К выполнению</option>
+                <option value="IN_PROGRESS">В процессе</option>
+                <option value="COMPLETED">Завершено</option>
+            </select>
+
+            <button type="submit" class="save-btn">Сохранить</button>
+            <button type="button" class="cancel-btn" onclick="closeModal()">Отмена</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Открытие модального окна
+    function openModal(id, title, description, dueDate, status) {
+        document.getElementById('taskId').value = id;
+        document.getElementById('title').value = title;
+        document.getElementById('description').value = description;
+        document.getElementById('dueDate').value = dueDate;
+        document.getElementById('status').value = status;
+
+        document.getElementById('editModal').style.display = 'block';
+    }
+
+    // Закрытие модального окна
+    function closeModal() {
+        document.getElementById('editModal').style.display = 'none';
+    }
+</script>
 </body>
 </html>

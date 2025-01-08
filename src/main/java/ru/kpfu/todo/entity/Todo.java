@@ -3,6 +3,7 @@ package ru.kpfu.todo.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import ru.kpfu.todo.enumiration.Priority;
+import ru.kpfu.todo.enumiration.Status;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -33,8 +34,9 @@ public class Todo {
     @Column(name = "due_date")
     private LocalDateTime dueDate;
 
-    @Column(name = "is_completed", nullable = false)
-    private Boolean isCompleted;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private Status status;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
