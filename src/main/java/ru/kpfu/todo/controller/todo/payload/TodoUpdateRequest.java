@@ -1,6 +1,8 @@
-package ru.kpfu.todo.controller.cabinet.payload;
+package ru.kpfu.todo.controller.todo.payload;
 
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.ToString;
@@ -13,11 +15,11 @@ import java.time.LocalDateTime;
 @ToString
 public class TodoUpdateRequest {
     private Long id;
-    @NotBlank(message = "title shouldn't be a blank")
+    @NotBlank(message = "title shouldn't be a empty")
     private String title;
-    @NotBlank(message = "description shouldn't be a blank")
+    @NotBlank(message = "description shouldn't be a empty")
     private String description;
-    @NotNull(message = "due date shouldn't be null'")
+    @Future(message = "due date should be in the future")
     private LocalDateTime dueDate;
     @NotNull(message = "priority shouldn't be null'")
     private Priority priority;

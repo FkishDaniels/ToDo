@@ -23,9 +23,10 @@
         }
 
         .card-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            display: flex; /* Используем flexbox */
+            flex-direction: column; /* Располагаем задачи в столбик */
+            gap: 20px; /* Расстояние между карточками */
+            align-items: center; /* Центрируем карточки по горизонтали */
         }
 
         .card {
@@ -34,11 +35,34 @@
             border-radius: 5px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s, box-shadow 0.3s;
+            width: 80%; /* Устанавливаем ширину карточки */
+            max-width: 600px; /* Максимальная ширина карточки */
+            margin: 0 auto; /* Центрируем карточки на странице */
         }
 
         .card:hover {
             transform: scale(1.05);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .priority {
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 5px;
+            color: white;
+            display: inline-block;
+        }
+
+        .priority.HIGH {
+            background-color: #d04437;
+        }
+
+        .priority.MEDIUM {
+            background-color: #ffab00;
+        }
+
+        .priority.LOW {
+            background-color: #00875a;
         }
 
         .card button {
@@ -115,28 +139,23 @@
             color: white;
             margin-left: 10px;
         }
-        /* Стили для разных уровней приоритета */
-        .high-priority {
-            background-color: #ffcccc; /* Светло-красный фон для высокого приоритета */
-            box-shadow: 0 4px 8px rgba(255, 0, 0, 0.2);
-        }
-
-        .medium-priority {
-            background-color: #ffffcc; /* Светло-желтый фон для среднего приоритета */
-            box-shadow: 0 4px 8px rgba(255, 255, 0, 0.2);
-        }
-
-        .low-priority {
-            background-color: #ccffcc; /* Светло-зеленый фон для низкого приоритета */
-            box-shadow: 0 4px 8px rgba(0, 255, 0, 0.2);
-        }
-
     </style>
 </head>
 <body>
 <header>
     <h1>Добро пожаловать, <span th:text="${user.username}"></span>!</h1>
     <p>Количество ваших задач: <span th:text="${user.todoList.size()}"></span></p>
+    <button onclick="location.href='/todos'" style="
+        background-color: #052d74;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 10px;
+    ">
+        Перейти ко всем задачам
+    </button>
 </header>
 
 <section>
@@ -147,8 +166,9 @@
             <p th:text="'Описание: ' + ${todo.description}"></p>
             <p th:text="'Срок: ' + ${todo.daysUntilDue}+ 'дн.'"></p>
             <p th:text="'Статус: ' + ${todo.status}"></p>
-            <p th:text="'Приоритет: '+${todo.priority}"></p>
 
+            <!-- Приоритет задачи -->
+            <span th:class="'priority ' + ${todo.priority}" th:text="${todo.priority}"></span>
 
             <input type="hidden" class="todoId" th:value="${todo.id}" />
             <input type="hidden" class="todoTitle" th:value="${todo.title}" />
@@ -201,13 +221,9 @@
 
     </div>
 </div>
-
 <script>
     function openModal(button) {
-        // Находим родительский элемент (карточку)
         const card = button.closest('.card');
-
-        // Извлекаем значения из скрытых полей
         const id = card.querySelector('.todoId').value;
         const title = card.querySelector('.todoTitle').value;
         const description = card.querySelector('.todoDescription').value;
@@ -215,7 +231,7 @@
         const status = card.querySelector('.todoStatus').value;
         const priority = card.querySelector('.todoPriority').value;
 
-        // Заполняем модальное окно данными
+        // Заполняем поля в модальном окне
         document.getElementById('taskId').value = id;
         document.getElementById('title').value = title;
         document.getElementById('description').value = description;
@@ -223,47 +239,48 @@
         document.getElementById('status').value = status;
         document.getElementById('priority').value = priority;
 
-        // Открываем модальное окно
         document.getElementById('editModal').style.display = 'block';
     }
 
-    document.getElementById('editForm').onsubmit = function(event) {
-        event.preventDefault();  // Отменяем стандартную отправку формы
-
-        var todoUpdateRequest = {
-            id: document.getElementById('taskId').value,
-            title: document.getElementById('title').value,
-            description: document.getElementById('description').value,
-            dueDate: document.getElementById('dueDate').value,
-            priority: document.getElementById('priority').value,
-            status: document.getElementById('status').value
-        };
-
-        // Отправка данных на сервер с помощью fetch
-        fetch('/todos/edit', {
-            method: 'PUT',  // Метод PUT для обновления
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(todoUpdateRequest)  // Преобразуем объект в JSON
-        })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Задача обновлена:', data);
-                // Закрываем модальное окно и обновляем страницу
-                closeModal();
-                location.reload();  // Перезагружаем страницу, чтобы отобразить обновленную задачу
-            })
-            .catch(error => {
-                console.error('Ошибка при обновлении задачи:', error);
-            });
-    };
-
-    // Закрытие модального окна
     function closeModal() {
         document.getElementById('editModal').style.display = 'none';
     }
 
+    // Обработчик для отправки данных через PUT
+    document.getElementById('editForm').onsubmit = function(event) {
+        event.preventDefault();  // Предотвращаем стандартную отправку формы
+
+        const formData = new FormData(event.target);
+        const data = Object.fromEntries(formData.entries());  // Преобразуем FormData в обычный объект
+
+        // Отправляем PUT запрос через fetch
+        fetch('/todos/edit', {
+            method: 'PUT',  // Указываем метод PUT
+            headers: {
+                'Content-Type': 'application/json'  // Указываем, что отправляем JSON
+            },
+            body: JSON.stringify(data)  // Преобразуем данные формы в JSON
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errors => {
+                        alert(errors.join('\n'));  // Показываем ошибки в случае неудачи
+                    });
+                }
+                return response.json();
+            })
+            .then(updatedTodo => {
+                // Обновляем задачу на странице после успешного ответа
+                closeModal();  // Закрываем модальное окно
+                alert('Задача обновлена');
+                location.reload();  // Перезагружаем страницу или можно обновить только нужную часть
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('Произошла ошибка при обновлении задачи');
+            });
+    };
 </script>
+
 </body>
 </html>

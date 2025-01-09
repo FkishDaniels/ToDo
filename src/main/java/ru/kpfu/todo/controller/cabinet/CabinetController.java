@@ -8,12 +8,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.kpfu.todo.entity.ApplicationUser;
-import ru.kpfu.todo.entity.Todo;
 import ru.kpfu.todo.service.ApplicationUserService;
 import ru.kpfu.todo.service.TodoService;
 import ru.kpfu.todo.util.UserUtilService;
 
-import java.util.List;
 
 @Controller
 @RequestMapping("/home")
@@ -30,8 +28,7 @@ public class CabinetController {
             Model model,
             Authentication authentication
     ) {
-        ApplicationUser user = userUtil.findUserByAuthentication(authentication);
-
+        var user = userUtil.findUserByAuthentication(authentication);
         var filteredTodos = todoService.getFilteredAll(user,priority);
 
 

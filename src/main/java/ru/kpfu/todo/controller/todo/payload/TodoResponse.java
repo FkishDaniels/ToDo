@@ -1,4 +1,4 @@
-package ru.kpfu.todo.controller.cabinet.payload;
+package ru.kpfu.todo.controller.todo.payload;
 
 import lombok.Data;
 import ru.kpfu.todo.enumiration.Priority;
@@ -15,5 +15,6 @@ public class TodoResponse {
     private LocalDateTime dueDate;
     private Priority priority;
     private Status status;
+    private boolean isTaken;
     private long daysUntilDue;
 }

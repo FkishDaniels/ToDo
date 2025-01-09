@@ -10,6 +10,7 @@ import ru.kpfu.todo.controller.authentication.payload.RegisterRequest;
 import ru.kpfu.todo.exception.already_exist.UserAlreadyExistsException;
 import ru.kpfu.todo.service.ApplicationUserService;
 import jakarta.validation.Valid;
+
 @Controller
 @RequestMapping("/authenticate")
 @RequiredArgsConstructor
@@ -22,22 +23,6 @@ public class AuthenticationController {
         return "loginPage";
     }
 
-    @PostMapping("/login")
-    public String authenticateUser(@ModelAttribute AuthenticationRequest authenticationRequest,
-                                   Model model){
-
-        try {
-            System.out.println("Полученный email: " + authenticationRequest.getEmail());
-            System.out.println("Полученный пароль: " + authenticationRequest.getPassword());
-            var user = userService.authenticate(authenticationRequest);
-            model.addAttribute("user", user);
-            return "redirect:/home";
-        }catch (BadCredentialsException e){
-            // Добавление ошибки в модель для отображения на странице
-            model.addAttribute("error", "Неверный email или пароль");
-            return "loginPage"; // Возврат к странице логина
-        }
-    }
 
     @GetMapping("/register")
     public String loadRegisterPage(Model model) {
