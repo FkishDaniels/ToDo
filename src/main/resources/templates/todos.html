@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Все задачи</title>
+    <style>
+        body {
+            font-family: 'Comfortaa', cursive;
+            background-color: #f4f5f7;
+            margin: 0;
+            padding: 20px;
+        }
+
+        header {
+            background-color: #0747a6;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .tasks-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .task-card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .task-header h2 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .priority {
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 5px;
+            color: white;
+        }
+
+        .priority.HIGH {
+            background-color: #d04437;
+        }
+
+        .priority.MEDIUM {
+            background-color: #ffab00;
+        }
+
+        .priority.LOW {
+            background-color: #00875a;
+        }
+
+        .task-body {
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .actions {
+            text-align: right;
+        }
+
+        .actions button {
+            background-color: #0052cc;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .actions button:hover {
+            background-color: #0747a6;
+        }
+        .back-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .back-btn:hover {
+            background-color: #218838;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.6); /* Темный фон */
+            padding-top: 60px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 400px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: black;
+        }
+
+        .form-input {
+            width: 50%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .form-submit {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .form-submit:hover {
+            background-color: #218838;
+        }
+
+        .create-task-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .create-task-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>Все задачи</h1>
+    <a href="/home" class="back-btn">Вернуться в личный кабинет</a>
+    <!-- Кнопка для открытия модального окна создания задачи -->
+    <button class="create-task-btn" onclick="openModal()">Создать задачу</button>
+</header>
+
+<div class="tasks-container">
+    <div th:each="todo : ${todos}" class="task-card">
+        <div class="task-header">
+            <h2 th:text="${todo.title}"></h2>
+            <span th:class="'priority ' + ${todo.name}" th:text="${todo.name}"></span>
+        </div>
+        <div class="task-body">
+            <p th:text="${todo.description}"></p>
+            <p><strong>Дата создания:</strong> <span th:text="${#dates.format(todo.createdDate, 'dd.MM.yyyy')}"></span></p>
+            <p><strong>Срок:</strong> <span th:text="${#dates.format(todo.dueDate, 'dd.MM.yyyy')}"></span></p>
+        </div>
+        <div class="actions">
+            <form th:action="@{/todos/assign}" method="post">
+                <input type="hidden" name="todoId" th:value="${todo.id}">
+                <button type="submit">Взять в реализацию</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для создания задачи -->
+<form id="createTaskForm" class="modal">
+    <input type="text" class="form-input" id="taskTitle" placeholder="Название задачи" required>
+    <textarea class="form-input" id="taskDescription" placeholder="Описание задачи" required></textarea>
+    <input type="date" class="form-input" id="taskDueDate" required>
+    <input type="text" class="form-input" id="taskName" placeholder="Краткое описание задачи" required>
+    <select class="form-input" id="taskPriority" required>
+        <option value="HIGH">Высокий</option>
+        <option value="MEDIUM">Средний</option>
+        <option value="LOW">Низкий</option>
+    </select>
+    <button type="submit" class="form-submit">Создать задачу</button>
+    <span class="close" onclick="closeModal()">&times;</span>
+</form>
+<div id="errors"></div>
+<script>
+    async function loadTasks() {
+        const container = document.querySelector('.tasks-container');
+        container.innerHTML = ''; // Очистить перед загрузкой новых задач
+
+        try {
+            // Отправляем GET-запрос
+            const response = await fetch('/todos/get-all?pageNum=0&pageSize=10&sortStrategy=desc');
+            if (!response.ok) {
+                throw new Error(`Ошибка загрузки задач: ${response.statusText}`);
+            }
+
+            // Преобразуем ответ в JSON
+            const data = await response.json();
+
+            // Обрабатываем каждый элемент из полученного списка задач
+            data.content.forEach(todo => {
+                const taskCard = document.createElement('div');
+                taskCard.classList.add('task-card');
+
+                // Если задача взята, то показываем неактивную кнопку
+                const taskStatusButton = todo.taken
+                    ? `<button disabled class="taken-button">Задача уже взята вами</button>`
+                    : `<button onclick="assignTask(${todo.id}, ${todo.taken})">Взять в реализацию</button>`;
+
+                taskCard.innerHTML = `
+                    <div class="task-header">
+                        <h2>${todo.title}</h2>
+                        <span class="priority ${todo.priority}">${todo.priority}</span>
+                    </div>
+                    <div class="task-body">
+                        <p>${todo.description}</p>
+                        <p><strong>Дата создания:</strong> ${formatDate(todo.createdDate)}</p>
+                        <p><strong>Выполнить до :</strong> ${formatDate(todo.dueDate)}</p>
+                        <p><strong>Осталось дней:</strong> ${todo.daysUntilDue}</p>
+                    </div>
+                    <div class="actions">
+                        ${taskStatusButton}
+                    </div>
+                `;
+                container.appendChild(taskCard);
+            });
+        } catch (error) {
+            console.error('Ошибка при загрузке задач:', error);
+            container.innerHTML = '<p>Не удалось загрузить задачи. Попробуйте позже.</p>';
+        }
+    }
+
+    // Функция для форматирования даты
+    function formatDate(dateArray) {
+        const [year, month, day] = dateArray;
+        return `${day.toString().padStart(2, '0')}.${(month + 1).toString().padStart(2, '0')}.${year}`;
+    }
+
+    // Обновленная функция assignTask с alert для задачи, если она уже взята
+    async function assignTask(taskId, isTaken) {
+
+        try {
+            const response = await fetch(`/todos/sign/${taskId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`Ошибка назначения задачи: ${response.statusText}`);
+            }
+
+            alert(`Задача с ID ${taskId} успешно взята в реализацию.`);
+            loadTasks(); // Обновляем список задач после успешного назначения
+        } catch (error) {
+            console.error('Ошибка при назначении задачи:', error);
+            alert('Не удалось взять задачу в реализацию. Попробуйте позже.');
+        }
+    }
+    // Функции для открытия и закрытия модального окна
+    function openModal() {
+        const modal = document.getElementById('createTaskForm');
+        if (modal) {
+            modal.style.display = 'block';
+        } else {
+            console.error('Модальное окно не найдено');
+        }
+    }
+
+    function closeModal() {
+        document.getElementById('createTaskForm').style.display = 'none';
+    }
+
+    // Обработка отправки формы создания задачи
+    document.getElementById('createTaskForm').addEventListener('submit', async function (event) {
+        event.preventDefault();
+
+        const taskTitle = document.getElementById('taskTitle').value;
+        const taskDescription = document.getElementById('taskDescription').value;
+        const taskDueDate = document.getElementById('taskDueDate').value;
+        const taskPriority = document.getElementById('taskPriority').value;
+        const taskName = document.getElementById('taskName').value;
+        const newTask = {
+            title: taskTitle,
+            description: taskDescription,
+            dueDate: taskDueDate,
+            priority: taskPriority,
+            name: taskName,
+        };
+
+        try {
+            const response = await fetch('/todos/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newTask),
+            });
+
+            if (!response.ok) {
+                const errors = await response.json();
+                document.getElementById('errors').innerHTML = `
+                <ul>${errors.map(err => `<li>${err}</li>`).join('')}</ul>
+            `;
+                throw new Error('Ошибка при создании задачи');
+            }
+
+            alert('Задача успешно создана!');
+            document.getElementById('createTaskForm').reset();
+            closeModal(); // Закрытие модального окна
+            loadTasks(); // Обновление списка задач
+        } catch (error) {
+            console.error('Ошибка:', error);
+        }
+    });
+    // Вызов функции загрузки задач при загрузке страницы
+    document.addEventListener('DOMContentLoaded', loadTasks);
+</script>
+
+
+
+</body>
+</html>

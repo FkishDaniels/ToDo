@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кабинет</title>
+    <style>
+        /* Основные стили */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f5f7;
+            color: #172b4d;
+            margin: 0;
+            padding: 20px;
+        }
+
+        header {
+            background-color: #0747a6;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px;
+        }
+
+        .card-container {
+            display: flex; /* Используем flexbox */
+            flex-direction: column; /* Располагаем задачи в столбик */
+            gap: 20px; /* Расстояние между карточками */
+            align-items: center; /* Центрируем карточки по горизонтали */
+        }
+
+        .card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            width: 80%; /* Устанавливаем ширину карточки */
+            max-width: 600px; /* Максимальная ширина карточки */
+            margin: 0 auto; /* Центрируем карточки на странице */
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .priority {
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 5px;
+            color: white;
+            display: inline-block;
+        }
+
+        .priority.HIGH {
+            background-color: #d04437;
+        }
+
+        .priority.MEDIUM {
+            background-color: #ffab00;
+        }
+
+        .priority.LOW {
+            background-color: #00875a;
+        }
+
+        .card button {
+            background-color: #0747a6;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .card button:hover {
+            background-color: #052d74;
+        }
+
+        /* Стили модального окна */
+        #editModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            margin: 10% auto;
+            padding: 20px;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-content h2 {
+            margin-top: 0;
+        }
+
+        .modal-content label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .modal-content input,
+        .modal-content textarea,
+        .modal-content select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .modal-content button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .save-btn {
+            background-color: #0747a6;
+            color: white;
+        }
+
+        .cancel-btn {
+            background-color: #d04437;
+            color: white;
+            margin-left: 10px;
+        }
+        .delete-btn {
+            background-color: #d04437;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .delete-btn:hover {
+            background-color: #a33128;
+        }
+
+    </style>
+</head>
+<body>
+<header>
+    <h1>Добро пожаловать, <span th:text="${user.username}"></span>!</h1>
+    <p>Количество ваших задач: <span th:text="${user.todoList.size()}"></span></p>
+    <button onclick="location.href='/todos'" style="
+        background-color: #052d74;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 10px;
+    ">
+        Перейти ко всем задачам
+    </button>
+</header>
+<form th:action="@{/home}" method="get" style="margin-bottom: 20px;">
+    <label for="priority">Приоритет:</label>
+    <select name="priority" id="priority" th:value="${selectedPriority}">
+        <option value="">Все</option>
+        <option value="HIGH" th:selected="${selectedPriority == 'HIGH'}">Высокий</option>
+        <option value="MEDIUM" th:selected="${selectedPriority == 'MEDIUM'}">Средний</option>
+        <option value="LOW" th:selected="${selectedPriority == 'LOW'}">Низкий</option>
+    </select>
+
+    <label for="status">Статус:</label>
+    <select name="status" id="status" th:value="${selectedStatus}">
+        <option value="">Все</option>
+        <option value="TODO" th:selected="${selectedStatus == 'TODO'}">К выполнению</option>
+        <option value="IN_PROGRESS" th:selected="${selectedStatus == 'IN_PROGRESS'}">В процессе</option>
+        <option value="COMPLETED" th:selected="${selectedStatus == 'COMPLETED'}">Завершено</option>
+    </select>
+
+    <label for="sortBy">Сортировать по:</label>
+    <select name="sortBy" id="sortBy" th:value="${sortBy}">
+        <option value="">По умолчанию</option>
+        <option value="dueDate" th:selected="${sortBy == 'dueDate'}">Срок выполнения</option>
+        <option value="status" th:selected="${sortBy == 'status'}">Статус</option>
+    </select>
+
+    <button type="submit">Применить</button>
+</form>
+<section>
+    <h2>Список ваших задач</h2>
+    <div class="card-container">
+        <div class="card" th:each="todo : ${filteredTodos}">
+            <h3 th:text="${todo.title}"></h3>
+            <p th:text="'Описание: ' + ${todo.description}"></p>
+            <p th:text="'Срок: ' + ${todo.daysUntilDue}+ ' дн.'"></p>
+            <p th:text="'Статус: ' + ${todo.status}"></p>
+
+            <span th:class="'priority ' + ${todo.priority}" th:text="${todo.priority}"></span>
+
+            <input type="hidden" class="todoId" th:value="${todo.id}" />
+
+            <button onclick="openModal(this)">Редактировать</button>
+            <button onclick="deleteTodo(this)" class="delete-btn">Удалить</button>
+        </div>
+
+    </div>
+</section>
+
+<!-- Модальное окно -->
+<div id="editModal">
+    <div class="modal-content">
+        <h2>Редактировать задачу</h2>
+        <form id="editForm" th:action="@{/todos/edit}" method="post">
+            <input type="hidden" name="_method" value="put"/> <!-- Для PUT запроса -->
+
+            <input type="hidden" id="taskId" name="id" value="">
+
+            <label for="title">Название</label>
+            <input type="text" id="title" name="title" value="">
+
+            <label for="description">Описание</label>
+            <textarea id="description" name="description"></textarea>
+
+            <label for="dueDate">Срок выполнения</label>
+            <input type="datetime-local" id="dueDate" name="dueDate" value="">
+            <label for="priority">Приоритет</label>
+            <select id="priority" name="priority">
+                <option value="HIGH">Высокий</option>
+                <option value="MEDIUM">Средний</option>
+                <option value="LOW">Низкий</option>
+            </select>
+
+            <label for="status">Статус</label>
+            <select id="status" name="status">
+                <option value="TODO">К выполнению</option>
+                <option value="IN_PROGRESS">В процессе</option>
+                <option value="COMPLETED">Завершено</option>
+            </select>
+
+            <button type="submit" class="save-btn">Сохранить</button>
+            <button type="button" class="cancel-btn" onclick="closeModal()">Отмена</button>
+        </form>
+
+
+    </div>
+</div>
+<script>
+    function deleteTodo(button) {
+        const card = button.closest('.card');
+        const todoId = card.querySelector('.todoId').value;
+
+        if (confirm('Вы уверены, что хотите удалить эту задачу?')) {
+            fetch(`/todos?id=${todoId}`, {
+                method: 'DELETE',
+            })
+                .then(response => {
+                    if (response.ok) {
+                        card.remove(); // Удаляем карточку из DOM
+                        alert('Задача успешно удалена!');
+                    } else {
+                        alert('Ошибка при удалении задачи.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    alert('Произошла ошибка при удалении.');
+                });
+        }
+    }
+
+    function openModal(button) {
+        const card = button.closest('.card');
+        const id = card.querySelector('.todoId').value;
+        const title = card.querySelector('.todoTitle').value;
+        const description = card.querySelector('.todoDescription').value;
+        const dueDate = card.querySelector('.todoDueDate').value;
+        const status = card.querySelector('.todoStatus').value;
+        const priority = card.querySelector('.todoPriority').value;
+
+        // Заполняем поля в модальном окне
+        document.getElementById('taskId').value = id;
+        document.getElementById('title').value = title;
+        document.getElementById('description').value = description;
+        document.getElementById('dueDate').value = dueDate;
+        document.getElementById('status').value = status;
+        document.getElementById('priority').value = priority;
+
+        document.getElementById('editModal').style.display = 'block';
+    }
+
+    function closeModal() {
+        document.getElementById('editModal').style.display = 'none';
+    }
+
+    // Обработчик для отправки данных через PUT
+    document.getElementById('editForm').onsubmit = function(event) {
+        event.preventDefault();  // Предотвращаем стандартную отправку формы
+
+        const formData = new FormData(event.target);
+        const data = Object.fromEntries(formData.entries());  // Преобразуем FormData в обычный объект
+
+        // Отправляем PUT запрос через fetch
+        fetch('/todos/edit', {
+            method: 'PUT',  // Указываем метод PUT
+            headers: {
+                'Content-Type': 'application/json'  // Указываем, что отправляем JSON
+            },
+            body: JSON.stringify(data)  // Преобразуем данные формы в JSON
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errors => {
+                        alert(errors.join('\n'));  // Показываем ошибки в случае неудачи
+                    });
+                }
+                return response.json();
+            })
+            .then(updatedTodo => {
+                // Обновляем задачу на странице после успешного ответа
+                closeModal();  // Закрываем модальное окно
+                alert('Задача обновлена');
+                location.reload();  // Перезагружаем страницу или можно обновить только нужную часть
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('Произошла ошибка при обновлении задачи');
+            });
+    };
+</script>
+
+</body>
+</html>
