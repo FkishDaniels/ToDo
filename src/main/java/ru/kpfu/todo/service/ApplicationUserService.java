@@ -7,6 +7,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.kpfu.todo.controller.authentication.payload.AuthenticationRequest;
 import ru.kpfu.todo.controller.authentication.payload.RegisterRequest;
 import ru.kpfu.todo.controller.cabinet.payload.UserResponse;
@@ -29,6 +30,7 @@ public class ApplicationUserService {
     private final PasswordEncoder passwordEncoder;
     private final UserUtilService userUtilService;
 
+    @Transactional
     public void registerUser(RegisterRequest request) {
         checkEmail(request.getEmail());
 
@@ -39,6 +41,8 @@ public class ApplicationUserService {
 
         applicationUserRepository.save(newUser);
     }
+
+    @Transactional(readOnly = true)
     public ApplicationUser authenticate(AuthenticationRequest authenticationRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -58,13 +62,15 @@ public class ApplicationUserService {
         return passwordEncoder.encode(password);
     }
 
-    private void checkEmail(String email) {
+    @Transactional(readOnly = true)
+    public void checkEmail(String email) {
         var applicationUser = applicationUserRepository.findByEmail(email);
         if (applicationUser.isPresent()) {
             throw new UserAlreadyExistsException(email);
         }
     }
 
+    @Transactional
     public UserResponse updateUserTaskList(Todo todo, Authentication authentication) {
         var userToUpdate = userUtilService.findUserByAuthentication(authentication);
 

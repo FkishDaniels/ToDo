@@ -12,6 +12,11 @@ import ru.kpfu.todo.enumiration.GlobalPermissionName;
 @Entity
 @Table(name = "global_permission")
 public class GlobalPermission {
+
+    public GlobalPermission(GlobalPermissionName name) {
+        this.name = name;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
