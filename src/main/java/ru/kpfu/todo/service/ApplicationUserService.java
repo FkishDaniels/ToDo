@@ -11,14 +11,11 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.kpfu.todo.controller.authentication.payload.AuthenticationRequest;
 import ru.kpfu.todo.controller.authentication.payload.RegisterRequest;
 import ru.kpfu.todo.controller.cabinet.payload.UserResponse;
-import ru.kpfu.todo.controller.todo.payload.TodoResponse;
 import ru.kpfu.todo.entity.ApplicationUser;
 import ru.kpfu.todo.entity.Todo;
 import ru.kpfu.todo.exception.already_exist.UserAlreadyExistsException;
 import ru.kpfu.todo.repository.ApplicationUserRepository;
 import ru.kpfu.todo.util.UserUtilService;
-
-import java.time.temporal.ChronoUnit;
 import java.util.stream.Collectors;
 
 @Service

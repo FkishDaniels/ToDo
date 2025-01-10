@@ -17,7 +17,6 @@ import ru.kpfu.todo.exception.not_found.TodoNotFoundException;
 import ru.kpfu.todo.repository.TodoRepository;
 import ru.kpfu.todo.util.PageUtil;
 import ru.kpfu.todo.util.UserUtilService;
-
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
