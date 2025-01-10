@@ -22,13 +22,13 @@ services:
 
   liquibase-migrations:
     image: liquibase/liquibase:4.25
-    container_name: liquibase-translation
+    container_name: liquibase-todo
     restart: on-failure
     depends_on:
       postgresql:
         condition: service_healthy
     command:
-      - --changelog-file=db.changelog-master.yml
+      - --changelog-file=db.changelog-master.yaml
       - --driver=org.postgresql.Driver
       - --url=jdbc:postgresql://${POSTGRES_CONTAINER_NAME}:5432/${POSTGRES_DB}
       - --username=${POSTGRES_USER}

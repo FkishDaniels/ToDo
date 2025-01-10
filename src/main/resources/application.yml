@@ -1,13 +1,13 @@
 spring:
-  liquibase:
-    enabled: true
   application:
     name: ToDo
+  liquibase:
+    enabled: false
   datasource:
+    url: jdbc:postgresql://${POSTGRES_CONTAINER_NAME:localhost}:5432/${POSTGRES_DB:project}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/todo
-    username: postgres
-    password: bhbirf2003
   jpa:
     properties:
       hibernate:
@@ -16,4 +16,4 @@ spring:
     resources:
       static-locations: classpath:/static/
 server:
-  port: 8081
+  port: 8080

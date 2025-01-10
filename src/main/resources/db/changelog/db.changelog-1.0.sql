@@ -49,14 +49,9 @@ CREATE TABLE IF NOT EXISTS user_permission
 --changeset DaniilMarukha:5
 ALTER TABLE todo add column name VARCHAR(255) NOT NULL;
 -- Добавление задач в таблицу todo
-INSERT INTO application_user(username, email, password) VALUES ('Daniil Marukha','daniilka2003super@mail.ru','$2a$10$ad8HFweogf3oMSAsWQay2.c.5sm/rnVTbUovc1eR65aVwIVXpO3ae');
 INSERT INTO todo (title, description, created_date, due_date, status, priority, name)
 VALUES
     ('Complete Project', 'Finish the project documentation and submit it to the manager', NOW(), '2025-01-15 23:59:59', 'IN_PROGRESS', 'HIGH', 'Work'),
     ('Grocery Shopping', 'Buy vegetables, fruits, and other essentials for the week', NOW(), '2025-01-10 18:00:00', 'IN_PROGRESS', 'MEDIUM', 'Personal');
 
--- Связывание задач с пользователем с ID 1
-INSERT INTO user_todo (user_id, todo_id)
-VALUES
-    (1, 1), -- Связываем задачу с ID 1 с пользователем с ID 1
-    (1, 2); -- Связываем задачу с ID 2 с пользователем с ID 1
+
