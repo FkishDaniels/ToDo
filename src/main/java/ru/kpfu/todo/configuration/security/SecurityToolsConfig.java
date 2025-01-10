@@ -28,7 +28,7 @@ public class SecurityToolsConfig {
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> {
-            System.out.println("Received username: " + username); // Логируем username
+            System.out.println("Received username: " + username);
             return applicationUserRepository.findByEmail(username)
                     .orElseThrow(() -> new UserNotFoundException(username));
         };
