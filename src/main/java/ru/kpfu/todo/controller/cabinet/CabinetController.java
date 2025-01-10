@@ -25,11 +25,13 @@ public class CabinetController {
     @GetMapping()
     public String homePage(
             @RequestParam(required = false) String priority,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String sortBy,
             Model model,
             Authentication authentication
     ) {
         var user = userUtil.findUserByAuthentication(authentication);
-        var filteredTodos = todoService.getFilteredAll(user,priority);
+        var filteredTodos = todoService.getFilteredAll(user,priority,status,sortBy);
 
 
         model.addAttribute("user", user);

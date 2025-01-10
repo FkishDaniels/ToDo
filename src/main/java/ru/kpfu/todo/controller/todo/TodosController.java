@@ -36,18 +36,8 @@ public class TodosController {
             @RequestParam(value = "sortStrategy", required = false, defaultValue = "desc") String sortStrategy,
             Authentication authentication
     ) {
-        var user = userUtil.findUserByAuthentication(authentication);
-        var userTasksIds = todoService.getUserTasks(user.getId());
 
-        var todos = todoService.findAll(pageNum,pageSize,sortStrategy);
-
-        todos.forEach(
-                todo -> todo.setTaken(
-                        userTasksIds.contains(todo.getId())
-                )
-        );
-
-        return todos;
+        return todoService.findAllAndCheckTaken(pageNum,pageSize,sortStrategy,authentication);
     }
 
     @PutMapping("/edit")
@@ -75,5 +65,12 @@ public class TodosController {
             return ResponseEntity.badRequest().body(new TodoResponse());
         }
         return ResponseEntity.ok(todoService.createTodo(todoCreateRequest));
+    }
+
+    @DeleteMapping()
+    @ResponseBody
+    public ResponseEntity<Void> deleteTodo(@RequestParam Long id) {
+        todoService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

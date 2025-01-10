@@ -139,6 +139,20 @@
             color: white;
             margin-left: 10px;
         }
+        .delete-btn {
+            background-color: #d04437;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .delete-btn:hover {
+            background-color: #a33128;
+        }
+
     </style>
 </head>
 <body>
@@ -157,29 +171,49 @@
         Перейти ко всем задачам
     </button>
 </header>
+<form th:action="@{/home}" method="get" style="margin-bottom: 20px;">
+    <label for="priority">Приоритет:</label>
+    <select name="priority" id="priority" th:value="${selectedPriority}">
+        <option value="">Все</option>
+        <option value="HIGH" th:selected="${selectedPriority == 'HIGH'}">Высокий</option>
+        <option value="MEDIUM" th:selected="${selectedPriority == 'MEDIUM'}">Средний</option>
+        <option value="LOW" th:selected="${selectedPriority == 'LOW'}">Низкий</option>
+    </select>
 
+    <label for="status">Статус:</label>
+    <select name="status" id="status" th:value="${selectedStatus}">
+        <option value="">Все</option>
+        <option value="TODO" th:selected="${selectedStatus == 'TODO'}">К выполнению</option>
+        <option value="IN_PROGRESS" th:selected="${selectedStatus == 'IN_PROGRESS'}">В процессе</option>
+        <option value="COMPLETED" th:selected="${selectedStatus == 'COMPLETED'}">Завершено</option>
+    </select>
+
+    <label for="sortBy">Сортировать по:</label>
+    <select name="sortBy" id="sortBy" th:value="${sortBy}">
+        <option value="">По умолчанию</option>
+        <option value="dueDate" th:selected="${sortBy == 'dueDate'}">Срок выполнения</option>
+        <option value="status" th:selected="${sortBy == 'status'}">Статус</option>
+    </select>
+
+    <button type="submit">Применить</button>
+</form>
 <section>
     <h2>Список ваших задач</h2>
     <div class="card-container">
         <div class="card" th:each="todo : ${filteredTodos}">
             <h3 th:text="${todo.title}"></h3>
             <p th:text="'Описание: ' + ${todo.description}"></p>
-            <p th:text="'Срок: ' + ${todo.daysUntilDue}+ 'дн.'"></p>
+            <p th:text="'Срок: ' + ${todo.daysUntilDue}+ ' дн.'"></p>
             <p th:text="'Статус: ' + ${todo.status}"></p>
 
-            <!-- Приоритет задачи -->
             <span th:class="'priority ' + ${todo.priority}" th:text="${todo.priority}"></span>
 
             <input type="hidden" class="todoId" th:value="${todo.id}" />
-            <input type="hidden" class="todoTitle" th:value="${todo.title}" />
-            <input type="hidden" class="todoDescription" th:value="${todo.description}" />
-            <input type="hidden" class="todoDueDate" th:value="${todo.dueDate}" />
-            <input type="hidden" class="todoStatus" th:value="${todo.status}" />
-            <input type="hidden" class="todoPriority" th:value="${todo.priority}">
 
             <button onclick="openModal(this)">Редактировать</button>
-
+            <button onclick="deleteTodo(this)" class="delete-btn">Удалить</button>
         </div>
+
     </div>
 </section>
 
@@ -222,6 +256,29 @@
     </div>
 </div>
 <script>
+    function deleteTodo(button) {
+        const card = button.closest('.card');
+        const todoId = card.querySelector('.todoId').value;
+
+        if (confirm('Вы уверены, что хотите удалить эту задачу?')) {
+            fetch(`/todos?id=${todoId}`, {
+                method: 'DELETE',
+            })
+                .then(response => {
+                    if (response.ok) {
+                        card.remove(); // Удаляем карточку из DOM
+                        alert('Задача успешно удалена!');
+                    } else {
+                        alert('Ошибка при удалении задачи.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    alert('Произошла ошибка при удалении.');
+                });
+        }
+    }
+
     function openModal(button) {
         const card = button.closest('.card');
         const id = card.querySelector('.todoId').value;

@@ -42,6 +42,11 @@ public class Todo {
     @Column(nullable = false)
     private Priority priority;
 
-    @ManyToMany(mappedBy = "todoList")
+    @ManyToMany
+    @JoinTable(
+            name = "user_todo",
+            joinColumns = @JoinColumn(name = "todo_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
     private List<ApplicationUser> userList;
 }

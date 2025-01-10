@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import ru.kpfu.todo.controller.todo.payload.TodoCreateRequest;
@@ -20,7 +19,9 @@ import ru.kpfu.todo.util.UserUtilService;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -34,7 +35,10 @@ public class TodoService {
     private final ApplicationUserService applicationUserService;
 
 
-    public List<TodoResponse> getFilteredAll(ApplicationUser user, String priority) {
+    public List<TodoResponse> getFilteredAll( ApplicationUser user,
+                                              String priority,
+                                              String status,
+                                              String sortBy ) {
 
         List<TodoResponse> filteredTodos = user.getTodoList()
                 .stream()
@@ -44,6 +48,27 @@ public class TodoService {
         if (priority != null && !priority.isEmpty()) {
             filteredTodos = filteredTodos.stream()
                     .filter(todo -> todo.getPriority().name().equalsIgnoreCase(priority))
+                    .toList();
+        }
+
+        if (status != null && !status.isEmpty()) {
+            filteredTodos = filteredTodos.stream()
+                    .filter(todo -> todo.getStatus().name().equalsIgnoreCase(status))
+                    .toList();
+        }
+
+        if ("dueDate".equalsIgnoreCase(sortBy)) {
+            filteredTodos = filteredTodos.stream()
+                    .sorted(Comparator.comparing(TodoResponse::getDueDate))
+                    .toList();
+        } else if ("status".equalsIgnoreCase(sortBy)) {
+            Map<String, Integer> statusPriority = Map.of(
+                    "TODO", 1,
+                    "IN_PROGRESS", 2,
+                    "COMPLETED", 3
+            );
+            filteredTodos = filteredTodos.stream()
+                    .sorted(Comparator.comparing(todo -> statusPriority.get(todo.getStatus().name())))
                     .toList();
         }
 
@@ -64,6 +89,8 @@ public class TodoService {
     public Page<TodoResponse> findAll(Integer pageNum,
                                       Integer pageSize,
                                       String sortStrategy) {
+
+
         Pageable pageable = PageUtil.toPageable(pageNum,pageSize,Sort.by("title"),sortStrategy);
 
         return todoRepository.findAll(pageable)
@@ -91,10 +118,27 @@ public class TodoService {
         return dto;
     }
 
-    public List<Long> getUserTasks(Long userId) {
+    public List<Long> getUserTasks(Authentication authentication) {
+        var userId = userUtilService.findUserByAuthentication(authentication).getId();
+
+
         return todoRepository.findByUserList_Id(userId).stream()
                 .map(Todo::getId)
                 .collect(Collectors.toList());
+    }
+
+    public Page<TodoResponse> findAllAndCheckTaken(Integer pageNum, Integer pageSize, String sortStrategy, Authentication authentication) {
+        var userTasksIds = getUserTasks(authentication);
+
+        var todos = findAll(pageNum,pageSize,sortStrategy);
+
+        todos.forEach(
+                todo -> todo.setTaken(
+                        userTasksIds.contains(todo.getId())
+                )
+        );
+
+        return todos;
     }
 
     public TodoResponse createTodo(TodoCreateRequest todoCreateRequest) {
@@ -119,4 +163,13 @@ public class TodoService {
 
         return todo;
     }
+
+    public void delete(Long id) {
+        Todo todo = todoRepository.findById(id).orElseThrow(
+                () -> new TodoNotFoundException(id)
+        );
+
+        todoRepository.delete(todo);
+    }
+
 }
