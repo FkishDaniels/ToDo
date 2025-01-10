@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.kpfu.todo.controller.todo.payload.TodoCreateRequest;
 import ru.kpfu.todo.controller.todo.payload.TodoResponse;
 import ru.kpfu.todo.controller.todo.payload.TodoUpdateRequest;
@@ -16,7 +17,6 @@ import ru.kpfu.todo.exception.not_found.TodoNotFoundException;
 import ru.kpfu.todo.repository.TodoRepository;
 import ru.kpfu.todo.util.PageUtil;
 import ru.kpfu.todo.util.UserUtilService;
-
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
@@ -34,7 +34,7 @@ public class TodoService {
     private final UserUtilService userUtilService;
     private final ApplicationUserService applicationUserService;
 
-
+    @Transactional(readOnly = true)
     public List<TodoResponse> getFilteredAll( ApplicationUser user,
                                               String priority,
                                               String status,
@@ -75,8 +75,11 @@ public class TodoService {
         return filteredTodos;
     }
 
+    @Transactional
     public void updateTodo(TodoUpdateRequest todoUpdateRequest) {
-        Todo todo = todoRepository.findById(todoUpdateRequest.getId()).orElseThrow();
+        Todo todo = todoRepository.findById(todoUpdateRequest.getId()).orElseThrow(
+                () -> new TodoNotFoundException(todoUpdateRequest.getId())
+        );
         todo.setTitle(todoUpdateRequest.getTitle());
         todo.setDescription(todoUpdateRequest.getDescription());
         todo.setDueDate(todoUpdateRequest.getDueDate());
@@ -86,6 +89,7 @@ public class TodoService {
     }
 
 
+    @Transactional(readOnly = true)
     public Page<TodoResponse> findAll(Integer pageNum,
                                       Integer pageSize,
                                       String sortStrategy) {
@@ -97,6 +101,7 @@ public class TodoService {
                 .map(this::toDto);
     }
 
+    @Transactional()
     public void takeTodo(Long id, Authentication authentication) {
         ApplicationUser user = userUtilService.findUserByAuthentication(authentication);
         Todo todo = todoRepository.findById(id).orElseThrow(
@@ -118,6 +123,7 @@ public class TodoService {
         return dto;
     }
 
+    @Transactional(readOnly = true)
     public List<Long> getUserTasks(Authentication authentication) {
         var userId = userUtilService.findUserByAuthentication(authentication).getId();
 
@@ -127,6 +133,7 @@ public class TodoService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public Page<TodoResponse> findAllAndCheckTaken(Integer pageNum, Integer pageSize, String sortStrategy, Authentication authentication) {
         var userTasksIds = getUserTasks(authentication);
 
@@ -141,6 +148,7 @@ public class TodoService {
         return todos;
     }
 
+    @Transactional
     public TodoResponse createTodo(TodoCreateRequest todoCreateRequest) {
         var todo = mapToEntity(todoCreateRequest);
         var savedTodo = todoRepository.save(todo);
@@ -164,6 +172,7 @@ public class TodoService {
         return todo;
     }
 
+    @Transactional
     public void delete(Long id) {
         Todo todo = todoRepository.findById(id).orElseThrow(
                 () -> new TodoNotFoundException(id)

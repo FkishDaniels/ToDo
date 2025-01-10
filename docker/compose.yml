@@ -1,3 +1,6 @@
+include:
+  - postgres-compose.yml
+
 services:
   app:
     build:

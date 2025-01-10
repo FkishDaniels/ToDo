@@ -7,17 +7,15 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.kpfu.todo.controller.authentication.payload.AuthenticationRequest;
 import ru.kpfu.todo.controller.authentication.payload.RegisterRequest;
 import ru.kpfu.todo.controller.cabinet.payload.UserResponse;
-import ru.kpfu.todo.controller.todo.payload.TodoResponse;
 import ru.kpfu.todo.entity.ApplicationUser;
 import ru.kpfu.todo.entity.Todo;
 import ru.kpfu.todo.exception.already_exist.UserAlreadyExistsException;
 import ru.kpfu.todo.repository.ApplicationUserRepository;
 import ru.kpfu.todo.util.UserUtilService;
-
-import java.time.temporal.ChronoUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,6 +27,7 @@ public class ApplicationUserService {
     private final PasswordEncoder passwordEncoder;
     private final UserUtilService userUtilService;
 
+    @Transactional
     public void registerUser(RegisterRequest request) {
         checkEmail(request.getEmail());
 
@@ -39,6 +38,8 @@ public class ApplicationUserService {
 
         applicationUserRepository.save(newUser);
     }
+
+    @Transactional(readOnly = true)
     public ApplicationUser authenticate(AuthenticationRequest authenticationRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -58,13 +59,15 @@ public class ApplicationUserService {
         return passwordEncoder.encode(password);
     }
 
-    private void checkEmail(String email) {
+    @Transactional(readOnly = true)
+    public void checkEmail(String email) {
         var applicationUser = applicationUserRepository.findByEmail(email);
         if (applicationUser.isPresent()) {
             throw new UserAlreadyExistsException(email);
         }
     }
 
+    @Transactional
     public UserResponse updateUserTaskList(Todo todo, Authentication authentication) {
         var userToUpdate = userUtilService.findUserByAuthentication(authentication);
 

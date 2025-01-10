@@ -18,10 +18,4 @@ public class UserUtilService {
         return userRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new UserNotFoundException(userDetails.getUsername()));
     }
-
-    public ApplicationUser findUserByUsername(String username) {
-        System.out.println("Username: "+username);
-        return userRepository.findByEmail(username)
-                .orElseThrow(() -> new UserNotFoundException(username));
-    }
 }
