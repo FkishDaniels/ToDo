@@ -1,6 +1,7 @@
 package ru.kpfu.todo.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -132,6 +133,13 @@ public class TodoService {
                 .map(Todo::getId)
                 .collect(Collectors.toList());
     }
+
+    @Transactional(readOnly = true)
+    @Cacheable(value = "todos", key = "#id")
+    public TodoResponse findById(Long id){
+        return toDto(todoRepository.findById(id).orElseThrow(() -> new TodoNotFoundException(id)));
+    }
+
 
     @Transactional(readOnly = true)
     public Page<TodoResponse> findAllAndCheckTaken(Integer pageNum, Integer pageSize, String sortStrategy, Authentication authentication) {

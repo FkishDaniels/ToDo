@@ -3,6 +3,8 @@ package ru.kpfu.todo.controller.todo;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.kpfu.todo.controller.todo.payload.TodoCreateRequest;
 import ru.kpfu.todo.controller.todo.payload.TodoResponse;
 import ru.kpfu.todo.controller.todo.payload.TodoUpdateRequest;
+import ru.kpfu.todo.entity.Todo;
 import ru.kpfu.todo.service.TodoService;
 import ru.kpfu.todo.util.UserUtilService;
 
@@ -25,6 +28,13 @@ public class TodosController {
     @GetMapping()
     public String todos(Model model) {
         return "todos";
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<TodoResponse> getById(
+            @PathVariable Long id
+    ) {
+        return new ResponseEntity<>(todoService.findById(id),HttpStatus.valueOf(201));
     }
 
 

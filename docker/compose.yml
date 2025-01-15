@@ -1,5 +1,6 @@
 include:
   - postgres-compose.yml
+  - redis-compose.yml
 
 services:
   app:

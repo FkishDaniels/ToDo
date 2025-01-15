@@ -2,6 +2,7 @@ package ru.kpfu.todo.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.redis.core.RedisHash;
 import ru.kpfu.todo.enumiration.Priority;
 import ru.kpfu.todo.enumiration.Status;
 
@@ -15,6 +16,7 @@ import java.util.List;
 @Setter
 @Entity
 @Table(name = "todo")
+@RedisHash("Todo")
 public class Todo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
