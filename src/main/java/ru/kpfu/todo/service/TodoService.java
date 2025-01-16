@@ -135,7 +135,7 @@ public class TodoService {
     }
 
     @Transactional(readOnly = true)
-    @Cacheable(value = "todos", key = "#id")
+    @Cacheable(value = "todo", key = "#id")
     public TodoResponse findById(Long id){
         return toDto(todoRepository.findById(id).orElseThrow(() -> new TodoNotFoundException(id)));
     }

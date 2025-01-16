@@ -6,7 +6,7 @@ import ru.kpfu.todo.entity.Todo;
 
 import java.util.List;
 
-@Repository
+@Repository("todoJpaRepository")
 public interface TodoRepository extends JpaRepository<Todo, Long> {
     List<Todo> findByUserList_Id(Long userId);
 }

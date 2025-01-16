@@ -16,7 +16,6 @@ import java.util.List;
 @Setter
 @Entity
 @Table(name = "todo")
-@RedisHash("Todo")
 public class Todo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
