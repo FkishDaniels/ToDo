@@ -333,12 +333,14 @@
         const taskDueDate = document.getElementById('taskDueDate').value;
         const taskPriority = document.getElementById('taskPriority').value;
         const taskName = document.getElementById('taskName').value;
+        const taskStatus = "TODO";
         const newTask = {
             title: taskTitle,
             description: taskDescription,
             dueDate: taskDueDate,
             priority: taskPriority,
             name: taskName,
+            status: taskStatus,
         };
 
         try {

@@ -5,7 +5,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import ru.kpfu.todo.entity.ApplicationUser;
-import ru.kpfu.todo.exception.not_found.UserNotFoundException;
+import ru.kpfu.todo.exception.notFound.UserNotFoundException;
 import ru.kpfu.todo.repository.ApplicationUserRepository;
 
 @Service

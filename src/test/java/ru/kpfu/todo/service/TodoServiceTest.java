@@ -5,18 +5,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.Authentication;
-import ru.kpfu.todo.controller.todo.payload.TodoCreateRequest;
 import ru.kpfu.todo.controller.todo.payload.TodoResponse;
-import ru.kpfu.todo.controller.todo.payload.TodoUpdateRequest;
+import ru.kpfu.todo.controller.todo.payload.TodoRequest;
 import ru.kpfu.todo.entity.ApplicationUser;
 import ru.kpfu.todo.entity.Todo;
 import ru.kpfu.todo.enumiration.Priority;
 import ru.kpfu.todo.enumiration.Status;
 import ru.kpfu.todo.repository.TodoRepository;
-import ru.kpfu.todo.exception.not_found.TodoNotFoundException;
+import ru.kpfu.todo.exception.notFound.TodoNotFoundException;
 import ru.kpfu.todo.util.UserUtilService;
 
 import java.time.LocalDate;
@@ -42,7 +39,8 @@ public class TodoServiceTest {
     @Test
     @DisplayName("Успешное создание Todo")
     public void createTodo_Success() {
-        var createRequest = new TodoCreateRequest();
+        var createRequest = new TodoRequest();
+
         createRequest.setDescription("test description");
         createRequest.setPriority(Priority.HIGH);
         createRequest.setName("test name");
@@ -65,13 +63,13 @@ public class TodoServiceTest {
     @DisplayName("Успешное обновление Todo")
     public void updateTodo_Success() {
         var todo = createTodo();
-        var updateRequest = new TodoUpdateRequest();
+        var updateRequest = new TodoRequest();
         updateRequest.setDescription("Test Description");
         updateRequest.setTitle("Test Title");
         updateRequest.setId(1L);
         updateRequest.setStatus(Status.TODO);
         updateRequest.setPriority(Priority.HIGH);
-        updateRequest.setDueDate(LocalDateTime.now());
+        updateRequest.setDueDate(LocalDate.now());
 
         when(todoRepository.findById(1L)).thenReturn(Optional.of(todo));
 
@@ -88,13 +86,13 @@ public class TodoServiceTest {
     @Test
     @DisplayName("Ошибка при обновлении Todo с несуществующим ID")
     public void updateTodo_NotFound() {
-        var updateRequest = new TodoUpdateRequest();
+        var updateRequest = new TodoRequest();
         updateRequest.setDescription("Test Description");
         updateRequest.setTitle("Test Title");
         updateRequest.setId(1L);
         updateRequest.setStatus(Status.TODO);
         updateRequest.setPriority(Priority.HIGH);
-        updateRequest.setDueDate(LocalDateTime.now());
+        updateRequest.setDueDate(LocalDate.now());
 
         when(todoRepository.findById(1L)).thenReturn(Optional.empty());
 

@@ -5,6 +5,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,9 +14,10 @@ import ru.kpfu.todo.controller.authentication.payload.RegisterRequest;
 import ru.kpfu.todo.controller.cabinet.payload.UserResponse;
 import ru.kpfu.todo.entity.ApplicationUser;
 import ru.kpfu.todo.entity.Todo;
-import ru.kpfu.todo.exception.already_exist.UserAlreadyExistsException;
+import ru.kpfu.todo.exception.alreadyExist.UserAlreadyExistsException;
+import ru.kpfu.todo.exception.notFound.UserNotFoundException;
 import ru.kpfu.todo.repository.ApplicationUserRepository;
-import ru.kpfu.todo.util.UserUtilService;
+
 import java.util.stream.Collectors;
 
 @Service
@@ -25,7 +27,6 @@ public class ApplicationUserService {
     private final ApplicationUserRepository applicationUserRepository;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
-    private final UserUtilService userUtilService;
 
     @Transactional
     public void registerUser(RegisterRequest request) {
@@ -69,7 +70,7 @@ public class ApplicationUserService {
 
     @Transactional
     public UserResponse updateUserTaskList(Todo todo, Authentication authentication) {
-        var userToUpdate = userUtilService.findUserByAuthentication(authentication);
+        var userToUpdate = findUserByAuthentication(authentication);
 
         userToUpdate.getTodoList().add(todo);
         return toDto(applicationUserRepository.save(userToUpdate));
@@ -89,5 +90,11 @@ public class ApplicationUserService {
                         .map(Todo::getId)
                         .collect(Collectors.toList()))
                 .build();
+    }
+
+    public ApplicationUser findUserByAuthentication(Authentication authentication) {
+        var userDetails = (UserDetails) authentication.getPrincipal();
+        return applicationUserRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new UserNotFoundException(userDetails.getUsername()));
     }
 }
