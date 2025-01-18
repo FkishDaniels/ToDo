@@ -1,16 +1,15 @@
 package ru.kpfu.todo.service;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.kpfu.todo.controller.authentication.payload.AuthenticationRequest;
 import ru.kpfu.todo.controller.authentication.payload.RegisterRequest;
@@ -19,14 +18,12 @@ import ru.kpfu.todo.entity.ApplicationUser;
 import ru.kpfu.todo.entity.GlobalPermission;
 import ru.kpfu.todo.entity.Todo;
 import ru.kpfu.todo.enumiration.GlobalPermissionName;
-import ru.kpfu.todo.exception.already_exist.UserAlreadyExistsException;
+import ru.kpfu.todo.exception.alreadyExist.UserAlreadyExistsException;
 import ru.kpfu.todo.repository.ApplicationUserRepository;
-import ru.kpfu.todo.util.UserUtilService;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,8 +38,6 @@ class ApplicationUserServiceTest {
     private AuthenticationManager authenticationManager;
     @Mock
     private PasswordEncoder passwordEncoder;
-    @Mock
-    private UserUtilService userUtilService;
 
     @InjectMocks
     private ApplicationUserService applicationUserService;
@@ -108,14 +103,20 @@ class ApplicationUserServiceTest {
         todo.setId(1L);
 
         Authentication mockAuthentication = mock(Authentication.class);
+        UserDetails mockUserDetails = mock(UserDetails.class);
+        when(mockUserDetails.getUsername()).thenReturn("daniilka2003super@mail.ru");
+        when(mockAuthentication.getPrincipal()).thenReturn(mockUserDetails);
+
         ApplicationUser user = new ApplicationUser();
         user.setId(1L);
+        user.setEmail("daniilka2003super@mail.ru");
         user.setTodoList(new ArrayList<>());
-        GlobalPermissionName name = GlobalPermissionName.USER;
-        GlobalPermission permission = new GlobalPermission(name);
+
+        GlobalPermission permission = new GlobalPermission(GlobalPermissionName.USER);
         user.setGlobalPermissions(List.of(permission));
 
-        when(userUtilService.findUserByAuthentication(mockAuthentication)).thenReturn(user);
+        when(applicationUserRepository.findByEmail("daniilka2003super@mail.ru"))
+                .thenReturn(Optional.of(user));
         when(applicationUserRepository.save(user)).thenReturn(user);
 
         UserResponse response = applicationUserService.updateUserTaskList(todo, mockAuthentication);
@@ -124,6 +125,7 @@ class ApplicationUserServiceTest {
         assertTrue(user.getTodoList().contains(todo));
         verify(applicationUserRepository).save(user);
     }
+
 
     @Test
     @DisplayName("Проверка: email уже существует")

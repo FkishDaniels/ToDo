@@ -1,4 +1,4 @@
-package ru.kpfu.todo.exception.already_exist;
+package ru.kpfu.todo.exception.alreadyExist;
 
 import lombok.EqualsAndHashCode;
 import ru.kpfu.todo.exception.base.ApplicationConflictException;

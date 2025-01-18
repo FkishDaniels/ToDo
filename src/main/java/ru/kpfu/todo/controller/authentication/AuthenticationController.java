@@ -6,7 +6,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ru.kpfu.todo.controller.authentication.payload.AuthenticationRequest;
 import ru.kpfu.todo.controller.authentication.payload.RegisterRequest;
-import ru.kpfu.todo.exception.already_exist.UserAlreadyExistsException;
+import ru.kpfu.todo.exception.alreadyExist.UserAlreadyExistsException;
 import ru.kpfu.todo.service.ApplicationUserService;
 import jakarta.validation.Valid;
 

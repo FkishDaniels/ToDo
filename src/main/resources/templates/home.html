@@ -191,8 +191,8 @@
     <label for="sortBy">Сортировать по:</label>
     <select name="sortBy" id="sortBy" th:value="${sortBy}">
         <option value="">По умолчанию</option>
-        <option value="dueDate" th:selected="${sortBy == 'dueDate'}">Срок выполнения</option>
-        <option value="status" th:selected="${sortBy == 'status'}">Статус</option>
+        <option value="DueDate" th:selected="${sortBy == 'DueDate'}">Срок выполнения</option>
+        <option value="Status" th:selected="${sortBy == 'Status'}">Статус</option>
     </select>
 
     <button type="submit">Применить</button>
@@ -203,16 +203,20 @@
         <div class="card" th:each="todo : ${filteredTodos}">
             <h3 th:text="${todo.title}"></h3>
             <p th:text="'Описание: ' + ${todo.description}"></p>
-            <p th:text="'Срок: ' + ${todo.daysUntilDue}+ ' дн.'"></p>
-            <p th:text="'Статус: ' + ${todo.status}"></p>
-
+            <p th:text="'Срок: ' + ${todo.daysUntilDue} + ' дн.'"></p>
+            <p th:text="'Статус: ' + ${todo.status}" class="todoStatus"></p>
             <span th:class="'priority ' + ${todo.priority}" th:text="${todo.priority}"></span>
-
+            <input type="hidden" class="todoPriority" th:value="${todo.priority}"/>
+            <input type="hidden" class="todoDueDate" th:value="${todo.dueDate}"/>
             <input type="hidden" class="todoId" th:value="${todo.id}" />
+            <input type="hidden" class="todoTitle" th:value="${todo.title}" />
+            <input type="hidden" class="todoDescription" th:value="${todo.description}" />
+
 
             <button onclick="openModal(this)">Редактировать</button>
             <button onclick="deleteTodo(this)" class="delete-btn">Удалить</button>
         </div>
+
 
     </div>
 </section>

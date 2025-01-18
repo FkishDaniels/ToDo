@@ -1,22 +1,23 @@
 package ru.kpfu.todo.service;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.kpfu.todo.controller.todo.payload.TodoCreateRequest;
 import ru.kpfu.todo.controller.todo.payload.TodoResponse;
-import ru.kpfu.todo.controller.todo.payload.TodoUpdateRequest;
+import ru.kpfu.todo.controller.todo.payload.TodoRequest;
 import ru.kpfu.todo.entity.ApplicationUser;
 import ru.kpfu.todo.entity.Todo;
+import ru.kpfu.todo.enumiration.SortStrategy;
 import ru.kpfu.todo.enumiration.Status;
-import ru.kpfu.todo.exception.not_found.TodoNotFoundException;
+import ru.kpfu.todo.exception.notFound.TodoNotFoundException;
 import ru.kpfu.todo.repository.TodoRepository;
 import ru.kpfu.todo.util.PageUtil;
-import ru.kpfu.todo.util.UserUtilService;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
@@ -31,60 +32,64 @@ public class TodoService {
 
 
     private final TodoRepository todoRepository;
-    private final UserUtilService userUtilService;
     private final ApplicationUserService applicationUserService;
 
     @Transactional(readOnly = true)
     public List<TodoResponse> getFilteredAll( ApplicationUser user,
                                               String priority,
                                               String status,
-                                              String sortBy ) {
+                                              SortStrategy sortBy ) {
 
         List<TodoResponse> filteredTodos = user.getTodoList()
                 .stream()
                 .map(this::toDto)
                 .toList();
 
-        if (priority != null && !priority.isEmpty()) {
+        if (StringUtils.isNotEmpty(priority)) {
             filteredTodos = filteredTodos.stream()
                     .filter(todo -> todo.getPriority().name().equalsIgnoreCase(priority))
                     .toList();
         }
 
-        if (status != null && !status.isEmpty()) {
+        if (StringUtils.isNotEmpty(status)) {
             filteredTodos = filteredTodos.stream()
                     .filter(todo -> todo.getStatus().name().equalsIgnoreCase(status))
                     .toList();
         }
+        if(sortBy != null) {
+            filteredTodos = switch (sortBy) {
 
-        if ("dueDate".equalsIgnoreCase(sortBy)) {
-            filteredTodos = filteredTodos.stream()
-                    .sorted(Comparator.comparing(TodoResponse::getDueDate))
-                    .toList();
-        } else if ("status".equalsIgnoreCase(sortBy)) {
-            Map<String, Integer> statusPriority = Map.of(
-                    "TODO", 1,
-                    "IN_PROGRESS", 2,
-                    "COMPLETED", 3
-            );
-            filteredTodos = filteredTodos.stream()
-                    .sorted(Comparator.comparing(todo -> statusPriority.get(todo.getStatus().name())))
-                    .toList();
+                case DueDate -> filteredTodos.stream()
+                        .sorted(Comparator.comparing(TodoResponse::getDueDate))
+                        .toList();
+                case Status -> {
+                    Map<String, Integer> statusPriority = Map.of(
+                            "TODO", 1,
+                            "IN_PROGRESS", 2,
+                            "COMPLETED", 3
+                    );
+                    yield filteredTodos.stream()
+                            .sorted(Comparator.comparing(todo -> statusPriority.get(todo.getStatus().name())))
+                            .toList();
+                }
+                default -> throw new IllegalStateException("Unexpected value: " + sortBy);
+            };
+
         }
 
         return filteredTodos;
     }
 
     @Transactional
-    public void updateTodo(TodoUpdateRequest todoUpdateRequest) {
-        Todo todo = todoRepository.findById(todoUpdateRequest.getId()).orElseThrow(
-                () -> new TodoNotFoundException(todoUpdateRequest.getId())
+    public void updateTodo(TodoRequest todoRequest) {
+        Todo todo = todoRepository.findById(todoRequest.getId()).orElseThrow(
+                () -> new TodoNotFoundException(todoRequest.getId())
         );
-        todo.setTitle(todoUpdateRequest.getTitle());
-        todo.setDescription(todoUpdateRequest.getDescription());
-        todo.setDueDate(todoUpdateRequest.getDueDate());
-        todo.setPriority(todoUpdateRequest.getPriority());
-        todo.setStatus(todoUpdateRequest.getStatus());
+        todo.setTitle(todoRequest.getTitle());
+        todo.setDescription(todoRequest.getDescription());
+        todo.setDueDate(todoRequest.getDueDate().atStartOfDay());
+        todo.setPriority(todoRequest.getPriority());
+        todo.setStatus(todoRequest.getStatus());
         todoRepository.save(todo);
     }
 
@@ -103,7 +108,7 @@ public class TodoService {
 
     @Transactional()
     public void takeTodo(Long id, Authentication authentication) {
-        ApplicationUser user = userUtilService.findUserByAuthentication(authentication);
+        ApplicationUser user = applicationUserService.findUserByAuthentication(authentication);
         Todo todo = todoRepository.findById(id).orElseThrow(
                 () -> new TodoNotFoundException(id)
         );
@@ -125,13 +130,20 @@ public class TodoService {
 
     @Transactional(readOnly = true)
     public List<Long> getUserTasks(Authentication authentication) {
-        var userId = userUtilService.findUserByAuthentication(authentication).getId();
+        var userId = applicationUserService.findUserByAuthentication(authentication).getId();
 
 
         return todoRepository.findByUserList_Id(userId).stream()
                 .map(Todo::getId)
                 .collect(Collectors.toList());
     }
+
+    @Transactional(readOnly = true)
+    @Cacheable(value = "todo", key = "#id")
+    public TodoResponse findById(Long id){
+        return toDto(todoRepository.findById(id).orElseThrow(() -> new TodoNotFoundException(id)));
+    }
+
 
     @Transactional(readOnly = true)
     public Page<TodoResponse> findAllAndCheckTaken(Integer pageNum, Integer pageSize, String sortStrategy, Authentication authentication) {
@@ -149,7 +161,7 @@ public class TodoService {
     }
 
     @Transactional
-    public TodoResponse createTodo(TodoCreateRequest todoCreateRequest) {
+    public TodoResponse createTodo(TodoRequest todoCreateRequest) {
         var todo = mapToEntity(todoCreateRequest);
         var savedTodo = todoRepository.save(todo);
 
@@ -157,7 +169,7 @@ public class TodoService {
     }
 
 
-    private Todo mapToEntity(TodoCreateRequest todoCreateRequest) {
+    private Todo mapToEntity(TodoRequest todoCreateRequest) {
         Todo todo = new Todo();
         todo.setTitle(todoCreateRequest.getTitle());
         todo.setDescription(todoCreateRequest.getDescription());

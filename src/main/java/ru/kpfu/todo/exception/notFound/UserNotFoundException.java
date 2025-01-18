@@ -1,4 +1,4 @@
-package ru.kpfu.todo.exception.not_found;
+package ru.kpfu.todo.exception.notFound;
 
 import lombok.EqualsAndHashCode;
 import ru.kpfu.todo.exception.base.ApplicationNotFoundException;

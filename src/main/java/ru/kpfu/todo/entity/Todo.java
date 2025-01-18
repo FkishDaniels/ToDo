@@ -2,6 +2,7 @@ package ru.kpfu.todo.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.redis.core.RedisHash;
 import ru.kpfu.todo.enumiration.Priority;
 import ru.kpfu.todo.enumiration.Status;
 
